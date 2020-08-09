@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC
+    "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fh.mapper.IProductMapper">
+
+	<insert id="addProduct" parameterType="com.fh.po.product.Product">
+		insert into fh_product (name,price,brandId,createDate,showTime,filePath,type1,type2,type3)
+		 values (#{name}, #{price},#{brandId},#{createDate},#{showTime},#{filePath},#{type1},#{type2},#{type3})
+	</insert>
+	<sql id="productWhere">
+		<!-- 动态条件查询 -->
+		<where>
+			<if test="productName != null and productName!=''">
+				name like concat('%',#{productName},'%')
+			</if>
+			<if test="minPrice != null">
+				and price >= #{minPrice}
+			</if>
+			<if test="maxPrice != null">
+				and price &lt;= #{maxPrice}
+			</if>
+			<if test="minCreateDate != null">
+				and createDate >= #{minCreateDate}
+			</if>
+			<if test="maxCreateDate != null">
+				and createDate &lt; #{maxCreateDate}
+			</if>
+			<if test="selectId != null and selectId != -1">
+				and brandId = #{selectId}
+			</if>
+		</where>
+	</sql>
+
+	<select id="findCount" parameterType="com.fh.param.ProductWhere" resultType="long">
+		select count(*) from fh_product
+		<include refid="productWhere"></include>
+	</select>
+
+	<select id="findPageList" parameterType="com.fh.param.ProductWhere" resultType="com.fh.po.product.Product">
+		select t.* from (
+		select fp.id,name,price,brandName,createDate,showTime,
+		updateTime,filePath,isHot,isup,t1.typeName typeName1,t2.typeName typeName2,t3.typeName typeName3
+		from fh_product fp
+		left join fh_brand fb on fp.brandId = fb.id
+		left join fh_type t1 on fp.type1 = t1.id
+		left join fh_type t2 on fp.type2 = t2.id
+		left join fh_type t3 on fp.type3 = t3.id
+		<!-- 动态条件查询 -->
+		<include refid="productWhere"></include>
+		order by fp.id desc
+		) t
+		limit #{start},#{length}
+	</select>
+	<delete id="deleteProduct" parameterType="long">
+		delete from fh_product where id=#{id}
+	</delete>
+	<select id="findById" parameterType="long" resultType="com.fh.po.product.Product">
+		select t.* from (
+		select fp.id,name,price,brandName,createDate,showTime,brandId,
+		updateTime,filePath,isHot,isup,t1.typeName typeName1,t2.typeName typeName2,t3.typeName typeName3,
+		type1,type2,type3
+		from fh_product fp
+		left join fh_brand fb on fp.brandId = fb.id
+		left join fh_type t1 on fp.type1 = t1.id
+		left join fh_type t2 on fp.type2 = t2.id
+		left join fh_type t3 on fp.type3 = t3.id
+
+		order by fp.id desc
+		) t where id=#{id}
+	</select>
+	<update id="updateProduct" parameterType="com.fh.po.product.Product">
+             update fh_product set name=#{name},price=#{price} ,brandId=#{brandId},
+             createDate=#{createDate},updateTime=#{updateTime},filePath=#{filePath},
+             type1=#{type1},type2=#{type2},type3=#{type3}
+              where id=#{id}
+	</update>
+	<delete id="batchDelete" parameterType="java.util.List">
+      delete from fh_product where id in
+      <foreach collection="list"  item="id" open="(" close=")" separator=",">
+             #{id}
+	  </foreach>
+	</delete>
+	<update id="updateIsHotStatus">
+		  update fh_product set isHot=#{status} where id=#{id}
+	</update>
+	<update id="updateIsupStatus">
+		  update fh_product set isup=#{status} where id=#{id}
+	</update>
+
+	<insert id="batchAdd" parameterType="java.util.List">
+		insert into fh_product(name,price,createDate,brandId) values
+		<foreach collection="list" item="p" separator=",">
+			(#{p.name},#{p.price},#{p.createDate},#{p.brandId})
+		</foreach>
+	</insert>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC
+    "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fh.mapper.IBrandMapper">
+
+	<select id="findBrand" resultType="com.fh.po.brand.Brand">
+         select * from fh_brand order by id desc;
+	</select>
+	<select id="findCount" parameterType="com.fh.param.Page" resultType="long">
+		select count(*) from fh_brand
+	</select>
+
+	<select id="findPageList" parameterType="com.fh.param.Page" resultType="com.fh.po.brand.Brand">
+		select t.* from (
+		select id,brandName,logo from fh_brand
+		order by id desc
+		) t
+		limit #{start},#{length}
+	</select>
+
+	<insert id="addBrand" parameterType="com.fh.po.brand.Brand">
+		insert into fh_brand(brandName,logo) values (#{brandName},#{logo})
+	</insert>
+
+	<delete id="deleteBrand" parameterType="long">
+		delete from fh_brand where id=#{id}
+	</delete>
+	<select id="getById" parameterType="long" resultType="com.fh.po.brand.Brand">
+     select * from fh_brand where id=#{id}
+	</select>
+
+	<update id="updateBrand" parameterType="com.fh.po.brand.Brand">
+      update fh_brand set brandName=#{brandName},logo=#{logo} where id=#{id};
+	</update>
+	<insert id="addBrandName" parameterType="com.fh.po.brand.Brand" useGeneratedKeys="true" keyProperty="id">
+		insert into fh_brand(brandName)values(#{brandName})
+	</insert>
+
+</mapper>

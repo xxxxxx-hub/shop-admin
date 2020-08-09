@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC
+    "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fh.mapper.IMemberMapper">
+    <!--动态查询-->
+    <sql id="queryWhere">
+        <where>
+            <if test="memberName !=null and memberName!=''">
+                memberName like concat('%',#{memberName},'%')
+            </if>
+
+            <if test="realName !=null and realName!=''">
+              and   realName like concat('%',#{realName},'%')
+            </if>
+
+            <if test="shengId !=null and shengId >-1">
+                and   shengId =#{shengId}
+            </if>
+
+
+            <if test="shiId !=null and shiId >-1">
+                and   shiId =#{shiId}
+            </if>
+
+
+            <if test="xianId !=null and xianId >-1">
+                and   xianId =#{xianId}
+            </if>
+
+
+            <if test="minDate !=null ">
+                and   birthday >=#{minDate}
+            </if>
+
+            <if test="maxDate !=null ">
+                and   birthday &lt;= #{maxDate}
+        </if>
+
+        </where>
+    </sql>
+
+      <select id="findList" parameterType="com.fh.param.MemberWhere" resultType="com.fh.po.member.Member">
+          select  t.*  from (
+             select * from  t_member
+          <include refid="queryWhere"></include>
+          order by id desc
+          ) t  limit #{start},#{length}
+    </select>
+
+
+     <select id="findCount" parameterType="com.fh.param.MemberWhere" resultType="Long">
+        select count(*) from t_member
+     <include refid="queryWhere"/>
+
+    </select>
+
+    <select id="findMemberByName" parameterType="String" resultType="com.fh.po.member.Member">
+
+		select * from t_member where memberName=#{v}
+	</select>
+
+
+</mapper>
